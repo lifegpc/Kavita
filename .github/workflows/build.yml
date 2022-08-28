@@ -1,0 +1,41 @@
+name: Build Nightly
+
+on:
+  push:
+    branches: [ "develop" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: 6.0.x
+      - name: Build linux-x64 version
+        run: |
+          dotnet msbuild -restore '-p:Configuration=Release' '-p:Platform=Any CPU' '-p:RuntimeIdentifiers=linux-x64'
+          cd API
+          dotnet publish -c Release --self-contained --runtime linux-x64 -o "../_output/linux-x64" --framework net6.0
+          cd ..
+          mv _output/linux-x64/API _output/linux-x64/Kavita
+          chmod 755 _output/linux-x64/Kavita
+      - name: Build Web UI
+        run: |
+          cd UI/Web
+          npm i
+          npm run prod
+          mkdir ../../_output/linux-x64/wwwroot
+          cp -rv dist/* ../../_output/linux-x64/wwwroot
+      - name: Package files
+        run: |
+          cd _output/linux-x64 && 7z '-x!config/*' -mx9 a ../linux-x64.7z . && 7z -mx9 a ../linux-x64-config.7z config
+      - name: Upload files
+        uses: actions/upload-artifact@v3
+        with:
+          name: linux-x64
+          path: |
+            _output/linux-x64.7z
+            _output/linux-x64-config.7z
