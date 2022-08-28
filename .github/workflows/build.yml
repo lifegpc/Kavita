@@ -29,13 +29,32 @@ jobs:
           npm run prod
           mkdir ../../_output/linux-x64/wwwroot
           cp -rv dist/* ../../_output/linux-x64/wwwroot
-      - name: Package files
+      - name: Package linux-x64 files
         run: |
-          cd _output/linux-x64 && 7z '-x!config/*' -mx9 a ../linux-x64.7z . && 7z -mx9 a ../linux-x64-config.7z config
-      - name: Upload files
+          cd _output/linux-x64 && 7z '-x!config' -mx9 a ../linux-x64.7z . && 7z -mx9 a ../linux-x64-config.7z config
+      - name: Upload linux-x64 files
         uses: actions/upload-artifact@v3
         with:
           name: linux-x64
           path: |
             _output/linux-x64.7z
             _output/linux-x64-config.7z
+      - name: Build win-x64 version
+        run: |
+          dotnet msbuild -restore '-p:Configuration=Release' '-p:Platform=Any CPU' '-p:RuntimeIdentifiers=win-x64'
+          cd API
+          dotnet publish -c Release --self-contained --runtime win-x64 -o "../_output/win-x64" --framework net6.0
+          cd ..
+          mv _output/win-x64/API.exe _output/win-x64/Kavita.exe
+      - name: Package win-x64 files
+        run: |
+          mkdir _output/win-x64/wwwroot
+          cp -rv UI/Web/dist/* _output/win-x64/wwwroot
+          cd _output/win-x64 && 7z '-x!config' -mx9 a ../win-x64.7z . && 7z -mx9 a ../win-x64-config.7z config
+      - name: Upload win-x64 files
+        uses: actions/upload-artifact@v3
+        with:
+          name: win-x64
+          path: |
+            _output/win-x64.7z
+            _output/win-x64-config.7z
