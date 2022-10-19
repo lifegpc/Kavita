@@ -8,6 +8,7 @@ using API.Data;
 using API.Data.Metadata;
 using API.Data.Repositories;
 using API.Data.Scanner;
+using API.DTOs.Metadata;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
@@ -130,17 +131,8 @@ public class MetadataService : IMetadataService
             return Task.CompletedTask;
 
         series.Volumes ??= new List<Volume>();
-        var firstCover = series.Volumes.GetCoverImage(series.Format);
-        string coverImage = null;
+        series.CoverImage = series.GetCoverImage();
 
-        var chapters = firstCover.Chapters.OrderBy(c => double.Parse(c.Number), ChapterSortComparerZeroFirst.Default).ToList();
-        if (chapters.Count > 1 && chapters.Any(c => c.IsSpecial))
-        {
-            coverImage = chapters.First(c => !c.IsSpecial).CoverImage ?? chapters.First().CoverImage;
-            firstCover = null;
-        }
-
-        series.CoverImage = firstCover?.CoverImage ?? coverImage;
         _updateEvents.Add(MessageFactory.CoverUpdateEvent(series.Id, MessageFactoryEntityTypes.Series));
         return Task.CompletedTask;
     }
