@@ -9,7 +9,6 @@ using API.Data;
 using API.Data.Repositories;
 using API.Entities;
 using API.Entities.Enums;
-using API.Extensions;
 using API.Helpers;
 using API.Parser;
 using API.Services.Tasks.Metadata;
@@ -29,12 +28,12 @@ public interface IScannerService
     /// <param name="forceUpdate">Don't perform optimization checks, defaults to false</param>
     [Queue(TaskScheduler.ScanQueue)]
     [DisableConcurrentExecution(60 * 60 * 60)]
-    [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
+    [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     Task ScanLibrary(int libraryId, bool forceUpdate = false);
 
     [Queue(TaskScheduler.ScanQueue)]
     [DisableConcurrentExecution(60 * 60 * 60)]
-    [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
+    [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     Task ScanLibraries();
 
     [Queue(TaskScheduler.ScanQueue)]
@@ -407,7 +406,7 @@ public class ScannerService : IScannerService
 
     [Queue(TaskScheduler.ScanQueue)]
     [DisableConcurrentExecution(60 * 60 * 60)]
-    [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
+    [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     public async Task ScanLibraries()
     {
         _logger.LogInformation("Starting Scan of All Libraries");

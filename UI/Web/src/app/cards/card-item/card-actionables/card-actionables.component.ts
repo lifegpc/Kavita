@@ -31,6 +31,12 @@ export class CardActionablesComponent implements OnInit {
       if (!user) return;
       this.isAdmin = this.accountService.hasAdminRole(user);
       this.canDownload = this.accountService.hasDownloadRole(user);
+
+      // We want to avoid an empty menu when user doesn't have access to anything
+      const validActions = this.actions.filter(a => a.children.length > 0 || a.dynamicList);
+      if (!this.isAdmin && validActions.filter(a => !a.requiresAdmin).length === 0) {
+        this.actions = [];
+      }
       this.cdRef.markForCheck();
     });
   }
@@ -69,6 +75,13 @@ export class CardActionablesComponent implements OnInit {
     }
     this.submenu[actionTitle] = subMenu;
     subMenu.open();
+  }
+
+  closeAllSubmenus() {
+    Object.keys(this.submenu).forEach(key => {
+      this.submenu[key].close();
+        delete this.submenu[key];
+    });
   }
 
   performDynamicClick(event: any, action: ActionItem<any>, dynamicItem: any) {

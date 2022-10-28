@@ -368,7 +368,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
         break;
       case Action.SendTo:
         {
-          const chapterIds = this.volumes.map(v => v.chapters.map(c => c.id)).flat()
+          const chapterIds = [...this.volumes.map(v => v.chapters.map(c => c.id)).flat(), ...this.specials.map(c => c.id)]
           const device = (action._extra!.data as Device);
           this.actionService.sendToDevice(chapterIds, device);
           break;
@@ -640,6 +640,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
   }
 
   openChapter(chapter: Chapter, incognitoMode = false) {
+    if (this.bulkSelectionService.hasSelections()) return;
     if (chapter.pages === 0) {
       this.toastr.error('There are no pages. Kavita was not able to read this archive.');
       return;
@@ -648,6 +649,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
   }
 
   openVolume(volume: Volume) {
+    if (this.bulkSelectionService.hasSelections()) return;
     if (volume.chapters === undefined || volume.chapters?.length === 0) {
       this.toastr.error('There are no chapters to this volume. Cannot read.');
       return;
